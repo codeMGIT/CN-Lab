@@ -1,40 +1,40 @@
 #include <stdio.h>
 #include <string.h>
 
-char a[50];
-char b[50];
-char flag[8] = "01111110";
+#define MAX 100
+#define FLAG "01111110"
 
 int main() {
-    int i = 0, j = 8, n, k;
+    char data[MAX];
+    char stuffed[2 * MAX];  // Enough space for stuffed bits
+    int i, j = 0, count = 0;
 
-    printf("Enter the message:\n");
-    gets(a); // Unsafe, but kept as in original code
+    printf("Enter the message (bit string):\n");
+    fgets(data, sizeof(data), stdin);
+    data[strcspn(data, "\n")] = '\0'; // Remove newline
 
-    strcpy(b, flag); // Start frame with FLAG
-    n = strlen(a);
+    // Start frame with FLAG
+    strcpy(stuffed, FLAG);
+    j = strlen(FLAG);
 
-    for (k = 0; k < n; k++) {
-        if (a[k] == '0' && a[k + 1] == '1' && a[k + 2] == '1' &&
-            a[k + 3] == '1' && a[k + 4] == '1' && a[k + 5] == '1') {
+    for (i = 0; data[i] != '\0'; i++) {
+        stuffed[j++] = data[i];
 
-            b[j] = '0';
-            b[j + 1] = '1';
-            b[j + 2] = '1';
-            b[j + 3] = '1';
-            b[j + 4] = '1';
-            b[j + 5] = '1';
-            b[j + 6] = '0';
-            i = i + 6;
-            j = j + 7;
+        if (data[i] == '1') {
+            count++;
+            if (count == 5) {       // After 5 consecutive 1s
+                stuffed[j++] = '0'; // Insert 0
+                count = 0;
+            }
+        } else {
+            count = 0; // Reset counter if 0
         }
-        b[j++] = a[i++];
     }
 
-    strcat(b, flag); // End frame with FLAG
+    // End frame with FLAG
+    strcpy(&stuffed[j], FLAG);
 
-    printf("\nMessage after bit Stuffing\n");
-    puts(b);
+    printf("\nMessage after bit stuffing:\n%s\n", stuffed);
 
     return 0;
 }
